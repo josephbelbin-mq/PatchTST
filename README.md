@@ -1,3 +1,12 @@
+## COMP8240 Project Extension
+
+This repository was used as the experimental framework for a COMP8240 project at Macquarie University. Additional datasets, scripts, and experiments were added to evaluate forecasting models on reconstructed real-world datasets and synthetic datasets with controllable interaction structures.
+
+For project details, experimental methodology, datasets, and results, please refer to the companion [iTransformer project repository](https://github.com/josephbelbin-mq/iTransformer) and the accompanying project report.
+
+The original PatchTST implementation and documentation are preserved below.
+
+
 # PatchTST (ICLR 2023)
 
 ### This is an offical implementation of PatchTST: [A Time Series is Worth 64 Words: Long-term Forecasting with Transformers](https://arxiv.org/abs/2211.14730). 
