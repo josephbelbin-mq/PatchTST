@@ -5,7 +5,7 @@ from exp.exp_main import Exp_Main
 import random
 import numpy as np
 
-if __name__ == '__main__':
+def get_parser():
     parser = argparse.ArgumentParser(description='Autoformer & Transformer family for Time Series Forecasting')
 
     # random seed
@@ -92,15 +92,9 @@ if __name__ == '__main__':
     parser.add_argument('--devices', type=str, default='0,1,2,3', help='device ids of multile gpus')
     parser.add_argument('--test_flop', action='store_true', default=False, help='See utils/tools for usage')
 
-    args = parser.parse_args()
+    return parser
 
-    # random seed
-    fix_seed = args.random_seed
-    random.seed(fix_seed)
-    torch.manual_seed(fix_seed)
-    np.random.seed(fix_seed)
-
-
+def process_args(args):
     args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
 
     if args.use_gpu and args.use_multi_gpu:
@@ -108,7 +102,20 @@ if __name__ == '__main__':
         device_ids = args.devices.split(',')
         args.device_ids = [int(id_) for id_ in device_ids]
         args.gpu = args.device_ids[0]
+    return args
 
+if __name__ == '__main__':   
+    print("HELLO")
+    parser = get_parser()
+    args = parser.parse_args()
+    args = process_args(args)
+
+    # random seed
+    fix_seed = args.random_seed
+    random.seed(fix_seed)
+    torch.manual_seed(fix_seed)
+    np.random.seed(fix_seed)
+    
     print('Args in experiment:')
     print(args)
 

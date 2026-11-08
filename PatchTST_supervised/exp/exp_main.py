@@ -16,6 +16,7 @@ import time
 import warnings
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
 
 warnings.filterwarnings('ignore')
 
@@ -194,13 +195,13 @@ class Exp_Main(Exp_Basic):
                     adjust_learning_rate(model_optim, scheduler, epoch + 1, self.args, printout=False)
                     scheduler.step()
 
-            print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_data, vali_loader, criterion)
-            test_loss = self.vali(test_data, test_loader, criterion)
 
-            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
-                epoch + 1, train_steps, train_loss, vali_loss, test_loss))
+            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f}".format(
+                epoch + 1, train_steps, train_loss, vali_loss))
+            print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
+
             early_stopping(vali_loss, self.model, path)
             if early_stopping.early_stop:
                 print("Early stopping")
@@ -225,7 +226,7 @@ class Exp_Main(Exp_Basic):
 
         preds = []
         trues = []
-        inputx = []
+        #inputx = []
         folder_path = './test_results/' + setting + '/'
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
@@ -274,23 +275,23 @@ class Exp_Main(Exp_Basic):
 
                 preds.append(pred)
                 trues.append(true)
-                inputx.append(batch_x.detach().cpu().numpy())
-                if i % 20 == 0:
-                    input = batch_x.detach().cpu().numpy()
-                    gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
-                    pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
-                    visual(gt, pd, os.path.join(folder_path, str(i) + '.pdf'))
+                #inputx.append(batch_x.detach().cpu().numpy())
+                #if i % 20 == 0:
+                #    input = batch_x.detach().cpu().numpy()
+                #    gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
+                #    pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
+                #    visual(gt, pd, os.path.join(folder_path, str(i) + '.pdf'))
 
         if self.args.test_flop:
             test_params_flop((batch_x.shape[1],batch_x.shape[2]))
             exit()
         preds = np.array(preds)
         trues = np.array(trues)
-        inputx = np.array(inputx)
+        #inputx = np.array(inputx)
 
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        inputx = inputx.reshape(-1, inputx.shape[-2], inputx.shape[-1])
+        #inputx = inputx.reshape(-1, inputx.shape[-2], inputx.shape[-1])
 
         # result save
         folder_path = './results/' + setting + '/'
@@ -306,8 +307,26 @@ class Exp_Main(Exp_Basic):
         f.write('\n')
         f.close()
 
+        data_source = str((Path(self.args.root_path) / self.args.data_path).resolve())
+        dataset_name = Path(self.args.data_path).stem
+
+        np.savez_compressed(
+            os.path.join(folder_path, f"{dataset_name}_results.npz"),
+            data_source=data_source,
+            dataset_name = dataset_name,
+            setting=setting,
+            args=vars(self.args),
+            mae=mae,
+            mse=mse,
+            rmse=rmse,
+            mape=mape,
+            mspe=mspe,
+            preds=preds,
+            trues=trues,
+        )
+
         # np.save(folder_path + 'metrics.npy', np.array([mae, mse, rmse, mape, mspe,rse, corr]))
-        np.save(folder_path + 'pred.npy', preds)
+        #np.save(folder_path + 'pred.npy', preds)
         # np.save(folder_path + 'true.npy', trues)
         # np.save(folder_path + 'x.npy', inputx)
         return
